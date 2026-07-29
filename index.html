@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio — Work Samples</title>
+<style>
+  :root {
+    --bg: #0F1419;
+    --surface: #1A2028;
+    --border: #2D3640;
+    --text: #E2E0DD;
+    --text-dim: #6B7280;
+    --accent: #4C9EEB;
+    --mono: "SF Mono", "Cascadia Mono", "Consolas", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  .page-title {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 48px;
+    text-align: center;
+  }
+
+  .category { margin-bottom: 48px; }
+
+  .cat-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .grid { display: grid; gap: 16px; }
+  .grid-4 { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+  .grid-2 { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  .grid-1 { grid-template-columns: 1fr; max-width: 500px; }
+
+  .slot {
+    position: relative;
+    aspect-ratio: 16/10;
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .slot.has-media {
+    border-style: solid;
+    border-color: var(--border);
+  }
+
+  .slot-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-dim);
+  }
+
+  .slot-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--text-dim);
+  }
+
+  .slot-hint {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .slot img, .slot video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  .slot video { background: #000; }
+  .slot.has-media .slot-placeholder { display: none; }
+
+  .slot-audio {
+    aspect-ratio: auto;
+    min-height: 80px;
+    padding: 20px;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .slot-audio audio {
+    width: 100%;
+    max-width: 400px;
+    height: 40px;
+    border-radius: 20px;
+  }
+
+  .slot-audio.has-media .slot-placeholder { display: none; }
+
+  .audio-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    .page { padding: 24px 16px 60px; }
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="page-title">Portfolio</div>
+
+  <div class="category">
+    <div class="cat-label">Models</div>
+    <div class="grid grid-4" id="models"></div>
+  </div>
+
+  <div class="category">
+    <div class="cat-label">Sound Effect</div>
+    <div class="grid grid-1" id="sound"></div>
+  </div>
+
+  <div class="category">
+    <div class="cat-label">Particle Effects</div>
+    <div class="grid grid-2" id="particles"></div>
+  </div>
+
+  <div class="category">
+    <div class="cat-label">Animation</div>
+    <div class="grid grid-1" id="animation"></div>
+  </div>
+</div>
+
+<script>
+const media = {
+  models: [
+    { file: 'media/model-1', type: 'visual' },
+    { file: 'media/model-2', type: 'visual' },
+    { file: 'media/model-3', type: 'visual' },
+    { file: 'media/model-4', type: 'visual' }
+  ],
+  sound: [
+    { file: 'media/sfx-1', type: 'audio' }
+  ],
+  particles: [
+    { file: 'media/particles-1', type: 'visual' },
+    { file: 'media/particles-2', type: 'visual' }
+  ],
+  animation: [
+    { file: 'media/animation-1', type: 'visual' }
+  ]
+};
+
+const imgExts = ['png','jpg','jpeg','gif','webp'];
+const vidExts = ['mp4','webm','mov'];
+const audExts = ['mp3','ogg','wav','m4a'];
+
+function tryLoad(basePath, extensions) {
+  return new Promise(resolve => {
+    let i = 0;
+    (function next() {
+      if (i >= extensions.length) return resolve(null);
+      const url = basePath + '.' + extensions[i];
+      fetch(url, { method: 'HEAD' }).then(r => {
+        if (r.ok) resolve({ url, ext: extensions[i] });
+        else { i++; next(); }
+      }).catch(() => { i++; next(); });
+    })();
+  });
+}
+
+function ph(hint) {
+  return '<div class="slot-placeholder"><div class="slot-icon">+</div><div class="slot-hint">' + hint + '</div></div>';
+}
+
+async function render() {
+  for (const [section, items] of Object.entries(media)) {
+    const container = document.getElementById(section);
+    for (const item of items) {
+      if (item.type === 'audio') {
+        const result = await tryLoad(item.file, audExts);
+        const el = document.createElement('div');
+        el.className = 'slot slot-audio' + (result ? ' has-media' : '');
+        if (result) {
+          el.innerHTML = '<audio controls src="' + result.url + '"></audio><div class="audio-name">' + result.url.split('/').pop() + '</div>';
+        } else {
+          el.innerHTML = ph('Audio');
+        }
+        container.appendChild(el);
+      } else {
+        const imgR = await tryLoad(item.file, imgExts);
+        const vidR = imgR ? null : await tryLoad(item.file, vidExts);
+        const r = imgR || vidR;
+        const el = document.createElement('div');
+        el.className = 'slot' + (r ? ' has-media' : '');
+        if (imgR) {
+          el.innerHTML = '<img src="' + imgR.url + '" alt="">';
+        } else if (vidR) {
+          el.innerHTML = '<video src="' + vidR.url + '" controls muted loop autoplay playsinline></video>';
+        } else {
+          el.innerHTML = ph('Photo / Video');
+        }
+        container.appendChild(el);
+      }
+    }
+  }
+}
+
+render();
+</script>
+</body>
+</html>
